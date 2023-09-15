@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.clay.peruvianpima.model.Product;
 import com.clay.peruvianpima.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,5 +30,31 @@ public class ProductController {
     @Autowired
     ProductRepository productRepository;
 
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getAllProducts() {
+        try {
+            List<Product> products = new ArrayList<Product>();
+
+            productRepository.findAll().forEach(products::add);
+
+            if (products.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(products, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/products")
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        try {
+            Product _product = productRepository.save(new Product(product.getName(), product.getQuantity(), product.getPrice(), product.getGender(), product.getCategory(), product.getImage_url()));
+            return new ResponseEntity<>(_product, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
